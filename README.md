@@ -28,7 +28,7 @@ failed_conversations  -- records that failed JSON parsing or validation
 | Decision | What we chose | Alternative | Why |
 |----------|--------------|-------------|-----|
 | Table structure | 2 tables: conversations + messages | single table | Conversations and messages are distinct entities — each table stores only what belongs to that entity. |
-| Idempotency on reruns | `DELETE WHERE load_date = X` + `INSERT` in one transaction | `UPSERT` | Full-day replacement semantics: if a corrected file removes a conversation entirely, UPSERT silently leaves the old row. DELETE+INSERT guarantees the warehouse matches exactly what's in the file. On failure, the transaction rolls back and the previous load stays intact. |
+| Idempotency on reruns | `DELETE WHERE load_date = X` + `INSERT` in one transaction | `UPSERT` | DELETE+INSERT guarantees the warehouse matches exactly what's in the file. On failure, the transaction rolls back and the previous load stays intact. |
 | Validation | Fail the whole conversation | Fail only the invalid message | A conversation with one invalid message has unreliable token totals even if other messages look fine. Failing the whole unit gives a clean, monitorable rejection rate; an upstream fix clears it on re-run. |
 
 ---
